@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Operation NeuroPredict</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #000000;
+            color: #e0e0e0;
+            transition: background 0.3s ease;
+        }
+        
+        body.light-mode {
+            background: #ffffff;
+            color: #000000;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            gap: 20px;
+        }
+        
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            text-align: center;
+            flex: 1;
+        }
+        
+        body.light-mode h1 { color: #000000; }
+        
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #a0a0a0;
+            font-size: 0.85rem;
+        }
+        
+        body.light-mode .theme-toggle {
+            background: #f0f0f0;
+            border-color: #cccccc;
+            color: #555555;
+        }
+        
+        .scan-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #666, transparent);
+            margin: 1rem 0;
+        }
+        
+        body.light-mode .scan-line {
+            background: linear-gradient(90deg, transparent, #ccc, transparent);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .card {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            padding: 24px;
+            border-radius: 12px;
+        }
+        
+        body.light-mode .card {
+            background: #ffffff;
+            border-color: #cccccc;
+        }
+        
+        .card h3 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.85rem;
+        }
+        
+        body.light-mode .card h3 { color: #000000; }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+        
+        body.light-mode label { color: #333333; }
+        
+        input[type="range"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 10px;
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        body.light-mode input[type="range"],
+        body.light-mode input[type="number"],
+        body.light-mode select {
+            background: #ffffff;
+            border-color: #cccccc;
+            color: #000000;
+        }
+        
+        .range-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 0.85rem;
+            color: #707070;
+        }
+        
+        body.light-mode .range-display { color: #888888; }
+        
+        .buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 14px 28px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        button:hover {
+            background: #1a1a1a;
+        }
+        
+        body.light-mode button {
+            background: #f0f0f0;
+            color: #000000;
+            border-color: #cccccc;
+        }
+        
+        body.light-mode button:hover {
+            background: #e0e0e0;
+        }
+        
+        .score-container {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 16px;
+            padding: 48px;
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        body.light-mode .score-container {
+            background: #ffffff;
+            border-color: #cccccc;
+        }
+        
+        .score-value {
+            font-size: 5rem;
+            font-weight: 700;
+            color: #e0e0e0;
+        }
+        
+        body.light-mode .score-value { color: #000000; }
+        
+        .score-label {
+            font-size: 0.9rem;
+            color: #707070;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+        
+        body.light-mode .score-label { color: #888888; }
+        
+        .score-status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #00ff88;
+            margin-top: 1rem;
+        }
+        
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        
+        .metric {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        body.light-mode .metric {
+            background: #ffffff;
+            border-color: #cccccc;
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e90ff;
+            margin-bottom: 8px;
+        }
+        
+        .metric-label {
+            font-size: 0.85rem;
+            color: #707070;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        body.light-mode .metric-label { color: #888888; }
+        
+        .chart-container {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+        
+        body.light-mode .chart-container {
+            background: #ffffff;
+            border-color: #cccccc;
+        }
+        
+        .chart-title {
+            margin-bottom: 16px;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        body.light-mode .chart-title { color: #000000; }
+        
+        .treatment-item {
+            background: #0d0d0d;
+            border-left: 3px solid #1e90ff;
+            padding: 16px;
+            margin: 12px 0;
+            border-radius: 4px;
+        }
+        
+        body.light-mode .treatment-item {
+            background: #ffffff;
+            border-color: #1e90ff;
+        }
+        
+        .treatment-name {
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+        
+        body.light-mode .treatment-name { color: #000000; }
+        
+        .treatment-detail {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            margin-top: 4px;
+        }
+        
+        body.light-mode .treatment-detail { color: #666666; }
+        
+        .badge {
+            display: inline-block;
+            background: #1a1a1a;
+            color: #00ff88;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            margin-top: 8px;
+            margin-right: 4px;
+        }
+        
+        body.light-mode .badge {
+            background: #f0f0f0;
+            color: #008844;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            color: #707070;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+        }
+        
+        body.light-mode .footer { color: #888888; }
+        
+        .results-section {
+            display: none;
+        }
+        
+        .results-section.active {
+            display: block;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 30px 0 20px 0;
+            color: #e0e0e0;
+        }
+        
+        body.light-mode .section-title { color: #000000; }
+        
+        .table-wrapper {
+            background: #0d0d0d;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        body.light-mode .table-wrapper {
+            background: #ffffff;
+            border-color: #cccccc;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th {
+            background: #2a2a2a;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #e0e0e0;
+            font-size: 0.9rem;
+        }
+        
+        body.light-mode th {
+            background: #f5f5f5;
+            color: #000000;
+        }
+        
+        td {
+            padding: 12px;
+            border-top: 1px solid #2a2a2a;
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+        
+        body.light-mode td {
+            border-color: #cccccc;
+            color: #333333;
+        }
+        
+        tr:hover td {
+            background: #141414;
+        }
+        
+        body.light-mode tr:hover td {
+            background: #f8f8f8;
+        }
+        
+        .error {
+            background: #3d1a1a;
+            color: #ff6b6b;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 12px 0;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #2a2a2a;
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 12px 0;
+        }
+        
+        body.light-mode .progress-bar {
+            background: #e0e0e0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #1e90ff, #00ff88);
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .status-text {
+            color: #00ff88;
+            font-weight: 500;
+            margin: 12px 0;
+        }
+        
+        .compound-selection {
+            margin: 16px 0;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .checkbox-item input {
+            width: auto;
+            cursor: pointer;
+        }
+        
+        .checkbox-item label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div style="flex: 1;"></div>
+            <h1>Operation NeuroPredict</h1>
+            <button class="theme-toggle" onclick="toggleTheme()">🌙 Dark</button>
+        </div>
+        
+        <div class="scan-line"></div>
+        
+        <!-- Input Section -->
+        <div class="grid">
+            <!-- Demographics & Biomarkers -->
+            <div class="card">
+                <h3>📊 Demographics & Biomarkers</h3>
+                <div class="form-group">
+                    <label>Age (years)</label>
+                    <input type="range" id="age" min="30" max="85" value="58">
+                    <div class="range-display"><span>30</span><span id="ageValue">58</span><span>85</span></div>
+                </div>
+                <div class="form-group">
+                    <label>Neurofilament Light (pg/mL)</label>
+                    <input type="number" id="nfl" min="5" max="500" value="120" step="5">
+                </div>
+                <div class="form-group">
+                    <label>Oxidative Stress Index</label>
+                    <input type="range" id="oxidative" min="0" max="100" value="65">
+                    <div class="range-display"><span>Low</span><span id="oxidativeValue">65</span><span>High</span></div>
+                </div>
+            </div>
+            
+            <!-- Functional Assessment -->
+            <div class="card">
+                <h3>🏥 Functional Assessment</h3>
+                <div class="form-group">
+                    <label>Forced Vital Capacity (%)</label>
+                    <input type="range" id="fvc" min="20" max="100" value="78">
+                    <div class="range-display"><span>20%</span><span id="fvcValue">78%</span><span>100%</span></div>
+                </div>
+                <div class="form-group">
+                    <label>ALSFRS-R Score (0-48)</label>
+                    <input type="range" id="alsfrs" min="0" max="48" value="40">
+                    <div class="range-display"><span>0</span><span id="alsfrsValue">40</span><span>48</span></div>
+                </div>
+                <div class="form-group">
+                    <label>King's Stage</label>
+                    <select id="kings">
+                        <option value="1">Stage 1 (One body region)</option>
+                        <option value="2">Stage 2 (Two regions)</option>
+                        <option value="3" selected>Stage 3 (Three regions)</option>
+                        <option value="4">Stage 4 (Requires support)</option>
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Progression & Genetics -->
+            <div class="card">
+                <h3>🧬 Progression & Genetics</h3>
+                <div class="form-group">
+                    <label>ΔFS (points/month)</label>
+                    <input type="range" id="delta" min="0" max="3" value="0.9" step="0.1">
+                    <div class="range-display"><span>Slow</span><span id="deltaValue">0.9</span><span>Fast</span></div>
+                </div>
+                <div class="form-group">
+                    <label>OPTN Variant</label>
+                    <select id="mutation">
+                        <option value="Wild-Type">Wild-Type (Sporadic ALS)</option>
+                        <option value="E478G">E478G (UBD Missense)</option>
+                        <option value="Q398X">Q398X (Nonsense)</option>
+                        <option value="R96L">R96L (CC Domain)</option>
+                        <option value="Q165X">Q165X (Early Truncation)</option>
+                        <option value="Exon5Del">Exon 5 Deletion</option>
+                        <option value="D474N">D474N (UBD)</option>
+                        <option value="K440Nfs">K440Nfs*8 (Frameshift)</option>
+                        <option value="M98K">M98K (Risk Variant)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Treatment Adherence (%)</label>
+                    <input type="range" id="adherence" min="50" max="100" value="90" step="5">
+                    <div class="range-display"><span>50%</span><span id="adherenceValue">90%</span><span>100%</span></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Treatment Selection -->
+        <div class="card" style="margin-bottom: 24px;">
+            <h3>💊 Select Treatments</h3>
+            <div class="checkbox-group" id="compoundList"></div>
+        </div>
+        
+        <!-- Buttons -->
+        <div class="buttons">
+            <button onclick="generatePrediction()">📊 Generate Prediction</button>
+            <button onclick="findOptimalProtocol()">🔬 Find Optimal Protocol</button>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection">
+            <div class="scan-line"></div>
+            
+            <!-- Score Display -->
+            <div id="scoreDisplay" class="hidden">
+                <div class="score-container">
+                    <div class="score-label">Neuron Survival Score</div>
+                    <div class="score-value" id="scoreValue">--</div>
+                    <div class="score-status" id="prognosis">--</div>
+                </div>
+                
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="survivalValue">--</div>
+                        <div class="metric-label">Predicted Survival (mo)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="benefitValue">--</div>
+                        <div class="metric-label">Treatment Benefit (mo)</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="alsfrsPreservation">--</div>
+                        <div class="metric-label">ALSFRS Preservation</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="synergyValue">--</div>
+                        <div class="metric-label">Synergy Factor</div>
+                    </div>
+                </div>
+                
+                <div class="section-title">Treatment Analysis</div>
+                <div id="treatmentDetails"></div>
+                
+                <div class="section-title">Disease Trajectory</div>
+                <div id="chartContainer1" class="chart-container">
+                    <div class="chart-title">Motor Neuron Survival</div>
+                    <div id="motorNeuronChart" style="height: 400px;"></div>
+                </div>
+                
+                <div id="chartsContainer2" class="chart-container">
+                    <div class="chart-title">Biomarkers Over Time</div>
+                    <div id="biomarkersChart" style="height: 600px;"></div>
+                </div>
+            </div>
+            
+            <!-- Optimization Results -->
+            <div id="optimizationResults" class="hidden">
+                <div class="section-title">Patient Profile Analysis</div>
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="progressionValue">--</div>
+                        <div class="metric-label">Progression</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="inflammationValue">--</div>
+                        <div class="metric-label">Inflammation</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="autophagyValue">--</div>
+                        <div class="metric-label">Autophagy</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="nfkbValue">--</div>
+                        <div class="metric-label">NF-κB</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="oxidativeValue2">--</div>
+                        <div class="metric-label">Oxidative</div>
+                    </div>
+                </div>
+                
+                <div class="metrics">
+                    <div class="metric">
+                        <div class="metric-value" id="optimalScore">--</div>
+                        <div class="metric-label">Neuron Score</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="optimalSurvival">--</div>
+                        <div class="metric-label">Predicted Survival</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="optimalDose">--</div>
+                        <div class="metric-label">Optimal Dose</div>
+                    </div>
+                    <div class="metric">
+                        <div class="metric-value" id="optimalCost">--</div>
+                        <div class="metric-label">Monthly Cost</div>
+                    </div>
+                </div>
+                
+                <div class="section-title">Top 20 Protocols</div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Protocol</th>
+                                <th>Survival (mo)</th>
+                                <th>Score</th>
+                                <th>Dose</th>
+                                <th>Synergy</th>
+                                <th>Cost/mo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="top20Table"></tbody>
+                    </table>
+                </div>
+                
+                <div id="optimizationCharts"></div>
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="status-text" id="statusText"></div>
+        </div>
+        
+        <div class="footer">Science Fair • Vivvan Jain</div>
+    </div>
+
+    <script>
+        // Data structures
+        const OPTN_MUTATIONS = {
+            'Wild-Type': { name: 'Wild-Type (Sporadic ALS)', survivalModifier: 1.0, inflam: 1.0, autophagy: 0.0, nfkb: 0.0 },
+            'E478G': { name: 'E478G (UBD Missense)', survivalModifier: 0.75, inflam: 1.45, autophagy: 0.75, nfkb: 0.85 },
+            'Q398X': { name: 'Q398X (Nonsense)', survivalModifier: 0.60, inflam: 1.55, autophagy: 0.85, nfkb: 0.90 },
+            'R96L': { name: 'R96L (CC Domain)', survivalModifier: 0.85, inflam: 1.25, autophagy: 0.50, nfkb: 0.55 },
+            'Q165X': { name: 'Q165X (Early Truncation)', survivalModifier: 0.45, inflam: 1.70, autophagy: 0.95, nfkb: 0.95 },
+            'Exon5Del': { name: 'Exon 5 Deletion', survivalModifier: 0.40, inflam: 1.75, autophagy: 0.95, nfkb: 0.95 },
+            'D474N': { name: 'D474N (UBD)', survivalModifier: 0.80, inflam: 1.30, autophagy: 0.60, nfkb: 0.65 },
+            'K440Nfs': { name: 'K440Nfs*8 (Frameshift)', survivalModifier: 0.55, inflam: 1.60, autophagy: 0.80, nfkb: 0.85 },
+            'M98K': { name: 'M98K (Risk Variant)', survivalModifier: 0.95, inflam: 1.10, autophagy: 0.30, nfkb: 0.25 }
+        };
+
+        const COMPOUNDS = {
+            'Riluzole': { evidence: 0.50, alsfrs: 0.0, survival: 1.5, cost: 800, targets: ['Glutamate'], inflam: 0.0 },
+            'Edaravone': { evidence: 0.65, alsfrs: 0.25, survival: 2.0, cost: 1200, targets: ['ROS'], inflam: 0.15 },
+            'Masitinib': { evidence: 0.85, alsfrs: 0.35, survival: 14.0, cost: 3500, targets: ['NF-κB', 'Inflammation'], inflam: 0.45 },
+            'Rapamycin': { evidence: 0.75, alsfrs: 0.30, survival: 10.0, cost: 200, targets: ['Autophagy'], inflam: 0.30 },
+            'Trehalose': { evidence: 0.70, alsfrs: 0.20, survival: 6.0, cost: 60, targets: ['Autophagy'], inflam: 0.25 },
+            'Omega-3': { evidence: 0.70, alsfrs: 0.18, survival: 4.0, cost: 40, targets: ['NF-κB'], inflam: 0.35 },
+            'Curcumin': { evidence: 0.65, alsfrs: 0.15, survival: 3.5, cost: 30, targets: ['NF-κB', 'Autophagy'], inflam: 0.30 },
+            'Resveratrol': { evidence: 0.60, alsfrs: 0.12, survival: 3.0, cost: 40, targets: ['Autophagy'], inflam: 0.25 },
+            'Spermidine': { evidence: 0.60, alsfrs: 0.15, survival: 4.0, cost: 35, targets: ['Autophagy'], inflam: 0.20 },
+            'NAC': { evidence: 0.55, alsfrs: 0.10, survival: 2.0, cost: 25, targets: ['ROS'], inflam: 0.15 }
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateRangeDisplays();
+            initializeCompoundList();
+            
+            // Add event listeners for range updates
+            document.querySelectorAll('input[type="range"]').forEach(input => {
+                input.addEventListener('input', updateRangeDisplays);
+            });
+        });
+
+        // Theme toggle
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            localStorage.setItem('theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+
+        // Initialize theme from localStorage
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+        }
+
+        // Initialize compound checkboxes
+        function initializeCompoundList() {
+            const list = document.getElementById('compoundList');
+            Object.keys(COMPOUNDS).forEach(name => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="compound_${name}" value="${name}">
+                    <label for="compound_${name}">${name}</label>
+                `;
+                list.appendChild(div);
+            });
+            // Default selection
+            document.getElementById('compound_Riluzole').checked = true;
+        }
+
+        // Update range displays
+        function updateRangeDisplays() {
+            document.getElementById('ageValue').textContent = document.getElementById('age').value;
+            document.getElementById('fvcValue').textContent = document.getElementById('fvc').value + '%';
+            document.getElementById('alsfrsValue').textContent = document.getElementById('alsfrs').value;
+            document.getElementById('deltaValue').textContent = document.getElementById('delta').value;
+            document.getElementById('oxidativeValue').textContent = document.getElementById('oxidative').value;
+            document.getElementById('adherenceValue').textContent = document.getElementById('adherence').value + '%';
+        }
+
+        // Core engine
+        class NeuroPredictEngine {
+            constructor() {
+                this.baselineSurvival = 30.0;
+            }
+
+            calculateBaselineScore(bio) {
+                let score = 50.0;
+                
+                if (bio.age < 50) {
+                    score += 12.0 * (50 - bio.age) / 20.0;
+                } else {
+                    score -= 15.0 * (bio.age - 50) / 35.0;
+                }
+
+                let nflZ = (bio.nfl - (8 + (bio.age - 50) * 0.5)) / 5;
+                score -= 8.0 * Math.max(0, nflZ / 5.0);
+                score += 15.0 * Math.pow(bio.fvc / 100.0, 1.2);
+                score += 12.0 * Math.pow(bio.alsfrs / 48.0, 1.1);
+
+                if (bio.deltaFs < 0.5) {
+                    score += 8.0;
+                } else if (bio.deltaFs >= 1.0) {
+                    score -= 10.0 * Math.min(1.0, (bio.deltaFs - 1.0) / 1.5);
+                }
+
+                score -= 6.0 * (bio.kingsStage - 1);
+                score -= 5.0 * (bio.oxidative / 100.0);
+
+                return Math.max(15, Math.min(95, score));
+            }
+
+            calculateCompoundEfficacy(comp, bio, mut, doseRatio = 1.0) {
+                let eff = comp.evidence;
+                const doseF = 0.3 + 0.7 * (1.0 - Math.abs(1.0 - doseRatio) ** 2);
+                
+                if (mut.inflam > 1.2) eff *= (1.0 + comp.inflam);
+                
+                return {
+                    efficacy: eff * doseF,
+                    survival: comp.survival * eff * doseF,
+                    alsfrs: comp.alsfrs * eff * doseF
+                };
+            }
+
+            calculateSynergy(compounds) {
+                if (compounds.length <= 1) return 0.0;
+                let targets = new Set();
+                compounds.forEach(c => c.targets.forEach(t => targets.add(t)));
+                return Math.max(-0.15, targets.size * 0.015 + compounds.length * 0.02 - 0.02 * Math.pow(compounds.length - 1, 1.5) - compounds.reduce((sum, c) => sum + 0.1, 0) * 0.3);
+            }
+
+            predict(bio, mut, compoundList, adherence = 0.90) {
+                const baseScore = this.calculateBaselineScore(bio);
+                const mutMod = mut.survivalModifier;
+                
+                let totalSurv = 0, totalAlsfrs = 0, details = [];
+                let compObjs = [];
+
+                compoundList.forEach(([comp, dose]) => {
+                    const eff = this.calculateCompoundEfficacy(comp, bio, mut, dose);
+                    const benefit = eff.survival * adherence;
+                    totalSurv += benefit;
+                    totalAlsfrs += eff.alsfrs * adherence;
+                    details.push({ name: Object.keys(COMPOUNDS).find(k => COMPOUNDS[k] === comp), efficacy: eff.efficacy, survival: benefit });
+                    compObjs.push(comp);
+                });
+
+                const synergy = this.calculateSynergy(compObjs);
+                totalSurv *= (1.0 + synergy);
+                const finalScore = Math.max(18, Math.min(94, baseScore + totalSurv * 1.5));
+                const finalSurv = this.baselineSurvival * mutMod + totalSurv;
+                
+                let prognosis = 'FAVORABLE';
+                if (finalScore < 70) prognosis = 'INTERMEDIATE';
+                if (finalScore < 50) prognosis = 'GUARDED';
+                if (finalScore < 35) prognosis = 'POOR';
+
+                return {
+                    score: finalScore,
+                    prognosis: prognosis,
+                    survival: finalSurv,
+                    benefit: totalSurv,
+                    alsfrs: totalAlsfrs,
+                    synergy: synergy,
+                    details: details
+                };
+            }
+
+            generateTrajectory(surv, treatmentEffect, nflBase, mutModifier = 1.0) {
+                const data = [];
+                let treatmentModifier = 0;
+                
+                if (treatmentEffect <= 0) treatmentModifier = 0.0;
+                else if (treatmentEffect < 2) treatmentModifier = 0.15 + treatmentEffect * 0.05;
+                else if (treatmentEffect < 10) treatmentModifier = 0.25 + (treatmentEffect - 2) * 0.04;
+                else treatmentModifier = Math.min(0.75, 0.57 + (treatmentEffect - 10) * 0.02);
+
+                let baseAlsfrsDecline = 0.8;
+                if (mutModifier < 0.75) baseAlsfrsDecline = 1.1;
+                if (mutModifier < 0.60) baseAlsfrsDecline = 1.5;
+                if (mutModifier < 0.45) baseAlsfrsDecline = 2.2;
+
+                const alsfrsDecline = baseAlsfrsDecline * (1.0 - treatmentModifier);
+                const fvcDecline = (2.0 + (1.0 - mutModifier) * 2.5) * (1.0 - treatmentModifier * 0.8);
+                
+                let startingAlsfrs = 48;
+                let startingFvc = 100;
+
+                for (let m = 0; m < Math.ceil(surv * 1.3); m++) {
+                    const als = Math.max(0, Math.min(48, startingAlsfrs - alsfrsDecline * m + (Math.random() - 0.5) * 1.2));
+                    const fvc = Math.max(15, Math.min(100, startingFvc - fvcDecline * m + (Math.random() - 0.5) * 3));
+                    const neuron = Math.max(5, Math.min(100, (70 + (mutModifier - 0.5) * 40) * Math.pow(0.975, m)));
+                    const nfl = Math.max(nflBase * 0.8, nflBase * (1 + 0.04 * m * (1.0 - treatmentModifier * 0.7)));
+
+                    data.push({
+                        month: m,
+                        alsfrs: Math.round(als * 10) / 10,
+                        fvc: Math.round(fvc * 10) / 10,
+                        neuron: Math.round(neuron * 10) / 10,
+                        nfl: Math.round(nfl * 10) / 10
+                    });
+                }
+
+                return data;
+            }
+        }
+
+        const engine = new NeuroPredictEngine();
+
+        // Generate prediction
+        function generatePrediction() {
+            const selected = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(el => el.value);
+            if (selected.length === 0) {
+                alert('Please select at least one treatment');
+                return;
+            }
+
+            const bio = {
+                age: parseInt(document.getElementById('age').value),
+                nfl: parseFloat(document.getElementById('nfl').value),
+                fvc: parseInt(document.getElementById('fvc').value),
+                alsfrs: parseInt(document.getElementById('alsfrs').value),
+                deltaFs: parseFloat(document.getElementById('delta').value),
+                kingsStage: parseInt(document.getElementById('kings').value),
+                oxidative: parseInt(document.getElementById('oxidative').value)
+            };
+
+            const mutName = document.getElementById('mutation').value;
+            const mut = OPTN_MUTATIONS[mutName];
+            const adherence = parseInt(document.getElementById('adherence').value) / 100;
+
+            const compoundList = selected.map(name => [COMPOUNDS[name], 1.0]);
+            const result = engine.predict(bio, mut, compoundList, adherence);
+
+            // Display results
+            document.getElementById('scoreValue').textContent = result.score.toFixed(1);
+            document.getElementById('prognosis').textContent = result.prognosis;
+            document.getElementById('survivalValue').textContent = result.survival.toFixed(1) + ' mo';
+            document.getElementById('benefitValue').textContent = '+' + result.benefit.toFixed(1) + ' mo';
+            document.getElementById('alsfrsPreservation').textContent = (result.alsfrs * 100).toFixed(0) + '%';
+            document.getElementById('synergyValue').textContent = result.synergy.toFixed(2);
+
+            let detailsHtml = '';
+            result.details.forEach(d => {
+                detailsHtml += `<div class="treatment-item">
+                    <div class="treatment-name">${d.name}</div>
+                    <div class="treatment-detail">Efficacy: ${d.efficacy.toFixed(2)} • +${d.survival.toFixed(1)} months</div>
+                </div>`;
+            });
+            document.getElementById('treatmentDetails').innerHTML = detailsHtml;
+
+            // Generate trajectories
+            const trajWith = engine.generateTrajectory(result.survival, result.benefit, bio.nfl, mut.survivalModifier);
+            const trajWithout = engine.generateTrajectory(result.survival, 0, bio.nfl, mut.survivalModifier);
+
+            // Motor neuron chart
+            const motorTrace1 = {
+                x: trajWithout.map(d => d.month),
+                y: trajWithout.map(d => d.neuron),
+                name: 'Without Treatment',
+                line: { color: '#FF4444', width: 2, dash: 'dash' }
+            };
+            const motorTrace2 = {
+                x: trajWith.map(d => d.month),
+                y: trajWith.map(d => d.neuron),
+                name: 'With Treatment',
+                line: { color: '#1E90FF', width: 3 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(30,144,255,0.2)'
+            };
+
+            Plotly.newPlot('motorNeuronChart', [motorTrace1, motorTrace2], {
+                title: 'Motor Neuron Survival',
+                xaxis: { title: 'Months', gridcolor: '#2a2a2a' },
+                yaxis: { title: 'Motor Neurons (%)', gridcolor: '#2a2a2a', range: [0, 110] },
+                plot_bgcolor: '#000',
+                paper_bgcolor: '#0d0d0d',
+                font: { color: '#e0e0e0' },
+                margin: { l: 60, r: 20, t: 40, b: 60 }
+            }, { responsive: true });
+
+            // Biomarkers chart - subplots
+            const bioTrace1_without = {
+                x: trajWithout.map(d => d.month),
+                y: trajWithout.map(d => d.nfl),
+                name: 'NfL (No Treatment)',
+                line: { color: '#FF4444', width: 2, dash: 'dash' },
+                xaxis: 'x',
+                yaxis: 'y'
+            };
+            const bioTrace1_with = {
+                x: trajWith.map(d => d.month),
+                y: trajWith.map(d => d.nfl),
+                name: 'NfL (Treated)',
+                line: { color: '#FF8888', width: 2 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(255,136,136,0.15)'
+            };
+
+            const bioTrace2_without = {
+                x: trajWithout.map(d => d.month),
+                y: trajWithout.map(d => d.fvc),
+                name: 'FVC (No Treatment)',
+                line: { color: '#008844', width: 2, dash: 'dash' },
+                xaxis: 'x2',
+                yaxis: 'y2'
+            };
+            const bioTrace2_with = {
+                x: trajWith.map(d => d.month),
+                y: trajWith.map(d => d.fvc),
+                name: 'FVC (Treated)',
+                line: { color: '#00FF88', width: 2 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(0,255,136,0.15)'
+            };
+
+            const bioTrace3_without = {
+                x: trajWithout.map(d => d.month),
+                y: trajWithout.map(d => d.alsfrs),
+                name: 'ALSFRS (No Treatment)',
+                line: { color: '#0066AA', width: 2, dash: 'dash' },
+                xaxis: 'x3',
+                yaxis: 'y3'
+            };
+            const bioTrace3_with = {
+                x: trajWith.map(d => d.month),
+                y: trajWith.map(d => d.alsfrs),
+                name: 'ALSFRS (Treated)',
+                line: { color: '#00BFFF', width: 2 },
+                fill: 'tozeroy',
+                fillcolor: 'rgba(0,191,255,0.15)'
+            };
+
+            Plotly.newPlot('biomarkersChart', 
+                [bioTrace1_without, bioTrace1_with, bioTrace2_without, bioTrace2_with, bioTrace3_without, bioTrace3_with],
+                {
+                    title: 'Disease Biomarkers Over Time',
+                    xaxis: { title: 'Months', domain: [0, 1] },
+                    xaxis2: { title: 'Months', domain: [0, 1] },
+                    xaxis3: { title: 'Months', domain: [0, 1] },
+                    yaxis: { title: 'NfL (pg/mL)', domain: [0.67, 1] },
+                    yaxis2: { title: 'FVC (%)', domain: [0.33, 0.67] },
+                    yaxis3: { title: 'ALSFRS-R', domain: [0, 0.33] },
+                    plot_bgcolor: '#000',
+                    paper_bgcolor: '#0d0d0d',
+                    font: { color: '#e0e0e0' },
+                    height: 600
+                }, { responsive: true });
+
+            document.getElementById('scoreDisplay').classList.remove('hidden');
+            document.getElementById('resultsSection').classList.add('active');
+            document.getElementById('optimizationResults').classList.add('hidden');
+        }
+
+        // Find optimal protocol
+        function findOptimalProtocol() {
+            const bio = {
+                age: parseInt(document.getElementById('age').value),
+                nfl: parseFloat(document.getElementById('nfl').value),
+                fvc: parseInt(document.getElementById('fvc').value),
+                alsfrs: parseInt(document.getElementById('alsfrs').value),
+                deltaFs: parseFloat(document.getElementById('delta').value),
+                kingsStage: parseInt(document.getElementById('kings').value),
+                oxidative: parseInt(document.getElementById('oxidative').value)
+            };
+
+            const mutName = document.getElementById('mutation').value;
+            const mut = OPTN_MUTATIONS[mutName];
+
+            document.getElementById('statusText').textContent = 'Testing protocols...';
+            document.getElementById('resultsSection').classList.add('active');
+            document.getElementById('scoreDisplay').classList.add('hidden');
+            document.getElementById('optimizationResults').classList.remove('hidden');
+
+            // Simulate optimization
+            setTimeout(() => {
+                const results = [];
+                const compounds = Object.entries(COMPOUNDS).map(([name, comp]) => [name, comp]);
+                const doseRatios = [0.75, 1.0, 1.25];
+                const adherenceRatios = [0.70, 0.85, 0.95];
+
+                // Generate combinations (simplified - test top combinations)
+                for (let i = 0; i < Math.min(100, compounds.length * compounds.length * doseRatios.length * adherenceRatios.length); i++) {
+                    const numCompounds = Math.floor(Math.random() * 2) + 2;
+                    const selectedIndices = [];
+                    while (selectedIndices.length < numCompounds) {
+                        const idx = Math.floor(Math.random() * compounds.length);
+                        if (!selectedIndices.includes(idx)) selectedIndices.push(idx);
+                    }
+                    
+                    const selectedCompounds = selectedIndices.map(idx => [COMPOUNDS[compounds[idx][0]], doseRatios[Math.floor(Math.random() * doseRatios.length)]]);
+                    const adherence = adherenceRatios[Math.floor(Math.random() * adherenceRatios.length)];
+                    const result = engine.predict(bio, mut, selectedCompounds, adherence);
+
+                    results.push({
+                        compounds: selectedIndices.map(idx => compounds[idx][0]),
+                        survival: result.survival,
+                        score: result.score,
+                        synergy: result.synergy,
+                        cost: selectedIndices.reduce((sum, idx) => sum + COMPOUNDS[compounds[idx][0]].cost, 0),
+                        dose: doseRatios[Math.floor(Math.random() * doseRatios.length)],
+                        adherence: adherence
+                    });
+                }
+
+                results.sort((a, b) => b.survival - a.survival);
+                const optimal = results[0];
+
+                // Display basic analysis
+                document.getElementById('progressionValue').textContent = bio.deltaFs < 0.5 ? 'SLOW' : bio.deltaFs < 1.0 ? 'NORMAL' : 'FAST';
+                document.getElementById('inflammationValue').textContent = mut.inflam > 1.2 ? 'HIGH' : 'NORMAL';
+                document.getElementById('autophagyValue').textContent = mut.autophagy > 0.5 ? 'IMPAIRED' : 'NORMAL';
+                document.getElementById('nfkbValue').textContent = mut.nfkb > 0.5 ? 'DYSREG' : 'NORMAL';
+                document.getElementById('oxidativeValue2').textContent = bio.oxidative > 60 ? 'ELEVATED' : 'NORMAL';
+
+                document.getElementById('optimalScore').textContent = optimal.score.toFixed(1);
+                document.getElementById('optimalSurvival').textContent = optimal.survival.toFixed(1) + ' mo';
+                document.getElementById('optimalDose').textContent = (optimal.dose * 100).toFixed(0) + '%';
+                document.getElementById('optimalCost').textContent = '$' + optimal.cost.toLocaleString();
+
+                // Display top 20
+                let tableHtml = '';
+                results.slice(0, 20).forEach((r, idx) => {
+                    tableHtml += `<tr>
+                        <td>${idx + 1}</td>
+                        <td>${r.compounds.join(' + ')}</td>
+                        <td>${r.survival.toFixed(1)}</td>
+                        <td>${r.score.toFixed(1)}</td>
+                        <td>${(r.dose * 100).toFixed(0)}%</td>
+                        <td>${r.synergy.toFixed(2)}</td>
+                        <td>$${r.cost.toLocaleString()}</td>
+                    </tr>`;
+                });
+                document.getElementById('top20Table').innerHTML = tableHtml;
+
+                document.getElementById('statusText').textContent = `✓ Tested ${results.length} protocol combinations`;
+            }, 500);
+        }
+    </script>
+</body>
+</html>

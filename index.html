@@ -155,19 +155,21 @@
         
         .buttons {
             display: flex;
-            gap: 12px;
-            margin-top: 24px;
+            gap: 16px;
+            margin-top: 32px;
+            margin-bottom: 32px;
         }
         
         button {
             flex: 1;
-            padding: 14px 28px;
+            padding: 16px 28px;
             background: #2a2a2a;
             color: #e0e0e0;
             border: 1px solid #2a2a2a;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 1rem;
             transition: all 0.2s;
         }
         
@@ -191,7 +193,7 @@
             border-radius: 16px;
             padding: 48px;
             text-align: center;
-            margin: 30px 0;
+            margin: 40px 0;
         }
         
         body.light-mode .score-container {
@@ -225,15 +227,27 @@
         
         .metrics {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin: 24px 0;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        @media (max-width: 1200px) {
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .metrics {
+                grid-template-columns: 1fr;
+            }
         }
         
         .metric {
             background: #0d0d0d;
             border: 1px solid #2a2a2a;
-            padding: 20px;
+            padding: 28px 16px;
             border-radius: 8px;
             text-align: center;
         }
@@ -244,17 +258,18 @@
         }
         
         .metric-value {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             color: #1e90ff;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
         
         .metric-label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: #707070;
             text-transform: uppercase;
             letter-spacing: 0.05em;
+            line-height: 1.3;
         }
         
         body.light-mode .metric-label { color: #888888; }
@@ -264,9 +279,8 @@
             border: 1px solid #2a2a2a;
             border-radius: 12px;
             padding: 24px;
-            margin: 24px 0;
-            min-height: 500px;
-            overflow: auto;
+            margin: 30px 0;
+            width: 100%;
         }
         
         body.light-mode .chart-container {
@@ -275,18 +289,26 @@
         }
         
         .chart-title {
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             font-weight: 600;
             color: #e0e0e0;
+            font-size: 1.1rem;
             position: relative;
             z-index: 1;
         }
         
         body.light-mode .chart-title { color: #000000; }
         
-        #motorNeuronChart,
+        #motorNeuronChart {
+            width: 100% !important;
+            height: 550px !important;
+            min-height: 550px !important;
+        }
+        
         #biomarkersChart {
             width: 100% !important;
+            height: 800px !important;
+            min-height: 800px !important;
         }
         
         .treatment-item {
@@ -357,13 +379,18 @@
         }
         
         .section-title {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 600;
-            margin: 30px 0 20px 0;
+            margin: 40px 0 24px 0;
             color: #e0e0e0;
+            border-bottom: 1px solid #2a2a2a;
+            padding-bottom: 12px;
         }
         
-        body.light-mode .section-title { color: #000000; }
+        body.light-mode .section-title { 
+            color: #000000;
+            border-bottom-color: #cccccc;
+        }
         
         .table-wrapper {
             background: #0d0d0d;
@@ -627,12 +654,12 @@
                 <div class="section-title">Disease Trajectory</div>
                 <div id="chartContainer1" class="chart-container">
                     <div class="chart-title">Motor Neuron Survival</div>
-                    <div id="motorNeuronChart" style="height: 400px;"></div>
+                    <div id="motorNeuronChart"></div>
                 </div>
                 
                 <div id="chartsContainer2" class="chart-container">
                     <div class="chart-title">Biomarkers Over Time</div>
-                    <div id="biomarkersChart" style="height: 600px;"></div>
+                    <div id="biomarkersChart"></div>
                 </div>
             </div>
             
@@ -985,7 +1012,9 @@
                 plot_bgcolor: '#000',
                 paper_bgcolor: '#0d0d0d',
                 font: { color: '#e0e0e0' },
-                margin: { l: 60, r: 20, t: 40, b: 60 }
+                margin: { l: 80, r: 20, t: 40, b: 60 },
+                height: 550,
+                autosize: false
             }, { responsive: true });
 
             // Biomarkers chart - subplots
@@ -1044,16 +1073,18 @@
                 [bioTrace1_without, bioTrace1_with, bioTrace2_without, bioTrace2_with, bioTrace3_without, bioTrace3_with],
                 {
                     title: 'Disease Biomarkers Over Time',
-                    xaxis: { title: 'Months', domain: [0, 1] },
-                    xaxis2: { title: 'Months', domain: [0, 1] },
-                    xaxis3: { title: 'Months', domain: [0, 1] },
-                    yaxis: { title: 'NfL (pg/mL)', domain: [0.67, 1] },
-                    yaxis2: { title: 'FVC (%)', domain: [0.33, 0.67] },
-                    yaxis3: { title: 'ALSFRS-R', domain: [0, 0.33] },
+                    xaxis: { title: 'Months', domain: [0, 1], gridcolor: '#1a1a1a' },
+                    xaxis2: { title: 'Months', domain: [0, 1], gridcolor: '#1a1a1a' },
+                    xaxis3: { title: 'Months', domain: [0, 1], gridcolor: '#1a1a1a' },
+                    yaxis: { title: 'NfL (pg/mL)', domain: [0.67, 1], gridcolor: '#1a1a1a' },
+                    yaxis2: { title: 'FVC (%)', domain: [0.33, 0.67], gridcolor: '#1a1a1a' },
+                    yaxis3: { title: 'ALSFRS-R', domain: [0, 0.33], gridcolor: '#1a1a1a' },
                     plot_bgcolor: '#000',
                     paper_bgcolor: '#0d0d0d',
                     font: { color: '#e0e0e0' },
-                    height: 600
+                    margin: { l: 80, r: 20, t: 40, b: 60 },
+                    height: 800,
+                    autosize: false
                 }, { responsive: true });
 
             document.getElementById('scoreDisplay').classList.remove('hidden');

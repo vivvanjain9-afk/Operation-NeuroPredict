@@ -265,6 +265,8 @@
             border-radius: 12px;
             padding: 24px;
             margin: 24px 0;
+            min-height: 500px;
+            overflow: auto;
         }
         
         body.light-mode .chart-container {
@@ -276,9 +278,16 @@
             margin-bottom: 16px;
             font-weight: 600;
             color: #e0e0e0;
+            position: relative;
+            z-index: 1;
         }
         
         body.light-mode .chart-title { color: #000000; }
+        
+        #motorNeuronChart,
+        #biomarkersChart {
+            width: 100% !important;
+        }
         
         .treatment-item {
             background: #0d0d0d;
